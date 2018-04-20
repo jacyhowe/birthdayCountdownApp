@@ -1,57 +1,67 @@
-// webpack plugins
-const CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
+import React, { Component } from 'react';
+import DatePicker from 'react-datepicker';
+import moment from 'moment';
+import Clock from './Clock';
 
-module.exports = {
+class BirthdayForm extends Component {
 
-  entry: {
-    'app': [
-      './src/bootstrap.js'
-    ],
-    'vendor': './src/vendor.js'
-  },
+    constructor(props) {
+        super(props);
 
-  resolve: {
+        this.handleChange = this.handleChange.bind(this);
+        this.handleGenerate = this.handleGenerate.bind(this);
+        this.handleChangeDate = this.handleChangeDate.bind(this);
 
-    extensions: ['.js', '.scss'],
+        this.state = {
+            startDate: moment(),
+            formCompleted: false
+        }
 
-    modules: ['node_modules']
+    }
 
-  },
+    handleChange(date) {
+        this.setState({
+            startDate: date
+        });
+    }
 
-  module: {
+    handleGenerate(event) {
+        this.setState({
+            formCompleted: true
+        })
+        event.preventDefault();
+    }
 
-    rules: [
+    handleChangeDate() {
+        this.setState({
+            formCompleted: false
+        })
+    }
 
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: ['babel-loader']
-      },
+    render() {
+        return (
+            <form onSubmit={this.handleGenerate} className="birthday-container">
+            {
+                this.state.formCompleted ?
+                    <div className="clock-container">
+                        <Clock birthdayFormState={this.state}/>
+                        <a className="change-date" onClick={this.handleChangeDate}>Change Date</a>
+                    </div>
+                :
+                    <div className="date-picker-container">
+                        <DatePicker className="date-picker"
+                            selected={this.state.startDate}
+                            onChange={this.handleChange}
+                        />
+                        <div className="submit-container">
+                            <input type="submit" value="Generate Countdown"/>
+                        </div>
+                    </div>
 
-      {
-        test: /\.json$/,
-        loader: 'json'
-      },
+            }
+            </form>
+        )
+    }
+}
 
-      {
-        test: /\.(jpg|png|gif|eot|svg|ttf|woff|woff2)$/,
-        loader: 'file',
-      },
-
-      {
-        test: /\.(mp4|webm)$/,
-        loader: 'url?limit=10000'
-      }
-
-    ]
-
-  },
-
-  plugins: [
-    new CommonsChunkPlugin({
-      name: ['app', 'vendor'],
-      minChunks: Infinity
-    })
-  ]
-
-};
+export default BirthdayForm;
